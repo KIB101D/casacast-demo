@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Kyero property IMPORT specification V3
+
+More information: http://help.kyero.com/article/354-xml-import-specification
+Mas infomacion: http://ayuda.kyero.com/article/358-especificaciones-de-importacion-xml-a-kyero-com
+
+This document specifies the XML feed to
+IMPORT property information TO Kyero.com
+
+If you have a problem or question, please open a support ticket:
+http://help.kyero.com -->
+
+<!--
+
+New in V3.8 - 03-09-2024
+
+- added <contact_number> node
+- added <whatsapp_number> node
+
+New in V3.7 - 14-05-2022
+
+- added <prime> node
+
+New in V3.7 - 07-07-2021
+
+- added <email> node
+
+New in V3.6 - 19-08-2020
+
+- added 'tags' sub node to <images>, to allow images to be tagged as a floorplan
+
+New in V3.5 - 08-04-2020
+
+- added <video_url> node
+- added <virtual_tour_url> node
+- added <catastral> node
+
+New in V3.4 - 11-08-2017
+
+- added <country> node
+
+New in V3.3 - 01-06-2016
+
+ - 'week' removed from <price_freq> node
+
+New in V3.2 - 11-03-2016
+ - max reference length increased from 15 to 255
+ - <desc> tag is mandatory now if there are no <features>
+ - some locales removed:
+ 	pl, ro
+
+New in V3.1 - 10-02-2015
+ - max number of images per property increased from 10 to 50
+ - some locales removed:
+ 	bg, cs, el, et, hu, id, ja, hi, ko, lt, lv, sk, sl, th, tr, uk, vi, zh
+
+New in version 3 - 09/12/2013
+
+<feed_version> changed to 3
+- V3 IMPORT & EXPORT specifications aligned
+- 'new_build' removed from <price_freq> node
+- added separate <new_build> node
+- reduced <currency> node options to EUR, GBP and USD
+- language sub nodes removed from <type> node
+- added <surface_area> node
+- added <location> node
+- added <energy_rating> node
+- added <url> node
+- added language sub nodes to <desc> node
+- added <notes> node
+- increased minimum required image size
+- removed <primary> image tag
+- removed <title> image tag
+-->
+
+<!-- Start XML specification -->
+
+<!-- <?xml version="1.0" encoding="UTF-8"?> -->
+<!-- XML version commented out in this document because it must be 1st line of feed -->
+
+	<root>
+	<!-- Mandatory, opens the feed -->
+
+		<kyero>
+			<feed_version>3</feed_version>
+		</kyero>
+		<!-- Mandatory, identifies the Kyero 3 feed version -->
+
+		<property>
+		<!-- Mandatory, opens the property node -->
+
+  			<id>1002</id>
+			<!-- Mandatory alphanumeric, max 50 characters
+			Your database or other unique identifier for the property.
+			Used in conjunction with the <date> tag to determine
+			if the property should be added or updated -->
+
+
+			<date>2013-04-05 13:45:45</date>
+			<!-- Mandatory datetime, 19 characters
+			Last modified date for this property in your database
+			If a last modified date is not available or accurate,
+			the feed will only be processed once a week
+   			Must follow standard datetime format of:
+   			YYYY-MM-DD HH:MM:SS
+   			Used in conjunction with the <id> tag
+   			to determine if the property should be added or updated -->
+
+			<ref>ABC123456</ref>
+			<!-- Mandatory alphanumeric, max 255 characters
+   			Your customer-visible reference for the property -->
+
+			<price>200000</price>
+			<!-- Mandatory numeric, max 8 characters
+   			Used in conjunction with <price_freq> and <currency> tags
+   			Enter the price for sale, or rental price per month
+   			Use whole numbers, no punctuation -->
+
+			<currency>EUR</currency>
+			<!-- Optional alpha: EUR, GBP or USD
+   			Used in conjunction with <price> tag
+   			EUR, empty or missing tag for prices in EUR
+   			Prices specified in GBP or USD will be converted to EUR -->
+
+			<price_freq>sale</price_freq>
+			<!-- Mandatory alpha
+   			'sale' for properties for sale
+   			'month' for properties for long term rental
+   			Used in conjunction with <price> and <currency> tags -->
+
+			<part_ownership>1</part_ownership>
+			<!-- Optional numeric
+   			'1' if price is for part ownership ownership
+   			Use if <price_freq> = 'sale'
+   			Empty, missing tag or '0' for 100% ownership of a property for sale -->
+
+			<leasehold>1</leasehold>
+			<!-- Optional numeric
+   			'1' if leasehold is being offered
+   			Use if <price_freq> = 'sale'
+   			Empty, missing tag or '0' if property freehold is for sale -->
+
+			<new_build>1</new_build>
+			<!-- Optional numeric
+   			'1' if property is less than 12 months old
+   			Used if <price_freq> = 'sale'
+   			Empty, missing tag or '0' if property is a resale -->
+
+			<type>terraced house</type>
+			<!-- Mandatory alpha, converted to a Kyero standard property type -->
+
+			<town>Marbella</town>
+			<!-- Mandatory alpha
+   			Town, preferably a valid Correos location eg: Javea, Nerja
+   			Converted to a Kyero standard town during import -->
+
+			<province>Malaga</province>
+			<!-- Mandatory alpha
+   			Province, preferably a valid Correos province eg: Malaga, Valencia
+   			Converted to a Kyero standard province during import -->
+
+   			<country>Spain</country>
+   			<!-- Optional alpha
+   			Country, eg: Spain, España, Portugal, France, França
+   			If empty or missing, country will default to Spain-->
+
+			<location>
+				<latitude>36.73454030</latitude>
+				<longitude>-3.69073610</longitude>
+			</location>
+			<!-- Optional numeric, max 15 characters
+			Accurate latitude and longitude of property
+   			Empty, missing tags or '0' if unknown -->
+
+   			<location_detail>Village</location_detail>
+			<!-- Optional alphanumeric, max 50 characters
+   			Free text to describe a village or urbanisation location
+   			which is either too small to be listed by Correos or is a
+   			'de-facto' place name eg: 'Las Alpujarras' or 'Costa del Sol' -->
+
+			<beds>1</beds>
+			<!-- Mandatory numeric, number of bedrooms
+   			Empty, missing tag or '0' if unknown -->
+
+			<baths>1</baths>
+			<!-- Mandatory numeric, number of bathrooms
+   			Empty, missing tag or '0' if unknown -->
+
+			<pool>1</pool>
+			<!-- Mandatory numeric
+   			'1' if a pool is available
+   			Empty, missing tag or '0' if unknown -->
+
+			<surface_area>
+				<built>200</built>
+				<plot>3000</plot>
+			</surface_area>
+			<!-- Optional numeric
+			Constructed and plot area in square metres
+   			Empty, missing tags or '0' if unknown -->
+
+			<energy_rating>
+				<consumption>A</consumption>
+				<emissions>A</emissions>
+			</energy_rating>
+			<!-- Optional alpha: A, B, C, D, E, F or G
+   			Empty, missing tags or 'X' if unknown -->
+
+			<url>
+				<ca>http://catalan.website.com/property/123456.htm</ca>
+				<da>http://danish.website.com/property/123456.htm</da>
+				<de>http://german.website.com/property/123456.htm</de>
+				<en>http://english.website.com/property/123456.htm</en>
+				<es>http://spanish.website.com/property/123456.htm</es>
+				<fi>http://finnish.website.com/property/123456.htm</fi>
+				<fr>http://french.website.com/property/123456.htm</fr>
+				<it>http://italian.website.com/property/123456.htm</it>
+				<nl>http://dutch.website.com/property/123456.htm</nl>
+				<no>http://norwegian.website.com/property/123456.htm</no>
+				<pt>http://portuguese.website.com/property/123456.htm</pt>
+				<ru>http://russian.website.com/property/123456.htm</ru>
+				<sv>http://swedish.website.com/property/123456.htm</sv>
+			</url>
+			<!-- Optional, max 255 characters
+			Absolute address of a language-specific web page that contains
+			further information, specific to this property
+      Empty or missing tag if language-specific url is not available -->
+
+
+      <video_url>https://youtu.be/dQw4w9WgXcQ</video_url>
+      <!-- Optional, max 255 characters
+      Absolute address to a shareable Youtube or Vimeo video link of the property.
+      If not youtube or vimeo, url will be ignored.-->
+
+      <virtual_tour_url>https://my.matterport.com/show/?m=eUuz64WjuQe</virtual_tour_url>
+      <!-- Optional, max 255 characters
+      Absolute address to a virtual tour of the property.
+      Only some providers are allowed, namely:
+        * Nodalview - `www.nodalview.com`
+        * Matterport - `my.matterport.com`
+        * EyeSpy360 - `eyespy360-vr-360-tour.com`
+        * iStaging - `livetour.istaging.com`
+      If not from any of the providers above, url will be ignored.-->
+
+      <catastral>1234567AB1234C0001DE</catastral>
+      <!-- Optional, 20 characters
+      Property cadastral reference, without whitespaces.-->
+
+			<desc>
+				<ca>Catalan property description</ca>
+				<da>Danish property description</da>
+				<de>German property description</de>
+				<en>English property description</en>
+				<es>Spanish property description</es>
+				<fi>Finnish property description</fi>
+				<fr>French property description</fr>
+				<it>Italian property description</it>
+				<nl>Dutch property description</nl>
+				<no>Norwegian property description</no>
+				<pt>Portuguese property description</pt>
+				<ru>Russian property description</ru>
+				<sv>Swedish property description</sv>
+   			</desc>
+			<!-- Mandatory alphanumeric, property description, no character limit
+			No HTML, UTF-8 encoded text only
+			Sentence case, no excessive capitalisation
+			Use &#13; to force a line break in the text (remember, no HTML)
+			Empty or missing tag if a language-specific description is not available -->
+
+			<features>
+				<feature>terrace</feature>
+				<feature>air conditioning</feature>
+				<feature>double glazing</feature>
+			</features>
+			<!-- Optional alpha, max 35 characters per property feature
+			Can be in Spanish or English
+			No HTML, UTF-8 encoded text only
+			No line breaks or punctuation
+			Will be automatically translated into each language -->
+
+			<notes>free text</notes>
+			<!-- Optional alphanumeric, max 255 characters
+			Can be used to store additional property-related information -->
+
+			<images>
+				<image id="1,2,3,4,5 .. 50">
+					<tags>
+          				<tag>floorplan</tag>
+       			</tags>
+					<url>http://www.mywebsite.com/149456/1.jpg</url>
+				</image>
+			</images>
+			<!-- Images node, maximum of 50 image id's per property
+			Image id's start at 1 and end in 50
+			URL tag is the absolute FTP or HTTP URL of each image
+			Images are processed and stored on a Kyero server
+			Specify an original image size at least 1280 x 960 pixels
+			Must end with a valid image file type, eg: .jpg
+			This format can be repeated for 50 images - up to <image id="50">
+			The order of the images in your feed will be preserved
+			on Kyero.com.  List the most important image first.
+			An optional tag can be added to indicate image is a floorplan -->
+
+    <prime>1</prime>
+    <!-- Optional numeric
+ 			'1' if property should be prioritised for prime
+ 			'0' if property should not be prime, noting it can still be selected as prime 
+ 			during Kyero's auto-selection
+ 			Missing tag if property is not explicitly prime, but is allowed to become prime 
+ 			during Kyero's auto-selection -->
+
+		<email>your.email@domain.com</email>
+		<!-- Optional alphanumeric, max 255 characters
+			Can be used to store a unique contact email per property -->
+
+		<whatsapp_number>0034666555444</whatsapp_number>
+		<!-- Optional numeric, must include a country code indentified in the format of 00##
+			Can be used to store a unique WhatsApp number per property -->
+
+		<contact_number>0034666555444</contact_number>
+		<!-- Optional numeric, must include a country code indentified in the format of 00##
+			Can be used to store a unique contact number per property -->
+
+		</property>
+		<!-- End of property node -->
+
+		<property></property>
+		<!-- Repeat structure for each property -->
+
+	</root>
+	<!-- Mandatory,  MUST be the last line of the feed -->
+
+<!-- End XML specification -->

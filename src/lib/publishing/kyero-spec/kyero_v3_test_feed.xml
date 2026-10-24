@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<root>
+<kyero>
+<feed_version>3</feed_version>
+</kyero>
+<property>
+<id>12367</id>
+<date>2013-09-27 12:00:10</date>
+<ref>V3TEST</ref>
+<price>250000</price>
+<currency>EUR</currency>
+<price_freq>sale</price_freq>
+<part_ownership>0</part_ownership>
+<leasehold>0</leasehold>
+<new_build>0</new_build>
+<type>villa</type>
+<town>almunecar</town>
+<province>granada</province>
+<country>spain</country>
+<location>
+<latitude>36.728807</latitude>
+<longitude>-3.693466</longitude>
+</location>
+<location_detail>optional location detail</location_detail>
+<beds>3</beds>
+<baths>2</baths>
+<pool>1</pool>
+<surface_area>
+<built>150</built>
+<plot>500</plot>
+</surface_area>
+<energy_rating>
+<consumption>D</consumption>
+<emissions>X</emissions>
+</energy_rating>
+<url>
+<ca>http://catalan.website.com/property/123456.htm</ca>
+<de>http://german.website.com/property/123456.htm</de>
+<da>http://danish.website.com/property/123456.htm</da>
+<en>http://english.website.com/property/123456.htm</en>
+<es>http://spanish.website.com/property/123456.htm</es>
+<fi>http://finnish.website.com/property/123456.htm</fi>
+<fr>http://french.website.com/property/123456.htm</fr>
+<it>http://italian.website.com/property/123456.htm</it>
+<nl>http://dutch.website.com/property/123456.htm</nl>
+<no>http://norwegian.website.com/property/123456.htm</no>
+<pt>http://portuguese.website.com/property/123456.htm</pt>
+<ru>http://russian.website.com/property/123456.htm</ru>
+<sv>http://swedish.website.com/property/123456.htm</sv>
+</url>
+<video_url>https://www.youtube.com/watch?v=dQw4w9WgXcQ</video_url>
+<virtual_tour_url>https://my.matterport.com/show/?m=eUuz64WjuQe</virtual_tour_url>
+<catastral>1234567AB1234C0001DE</catastral>
+<desc>
+<ca>Catalan property description</ca>
+<de>German property description</de>
+<da>Danish property description</da>
+<en>English property description</en>
+<es>Spanish property description</es>
+<fi>Finnish property description</fi>
+<fr>French property description</fr>
+<it>Italian property description</it>
+<nl>Dutch property description</nl>
+<no>Norwegian property description</no>
+<pt>Portuguese property description</pt>
+<ru>Russian property description</ru>
+<sv>Swedish property description</sv>
+</desc>
+<features>
+<feature>good rental potential</feature>
+<feature>near beach</feature>
+<feature>water possible</feature>
+</features>
+<notes>Private property notes</notes>
+<images>
+<image id="1">
+<url>http://images.kyero.com/12811577_large.jpg</url>
+</image>
+<image id="2">
+<tags>
+<tag>floorplan</tag>
+</tags>
+<url>http://images.kyero.com/12811578_large.jpg</url>
+</image>
+<image id="3">
+<url>http://images.kyero.com/12811579_large.jpg</url>
+</image>
+<image id="4">
+<url>http://images.kyero.com/12811581_large.jpg</url>
+</image>
+<image id="50">
+<url>http://images.kyero.com/12811582_large.jpg</url>
+</image>
+</images>
+<prime>1</prime>
+<email>john.smith@sandbox.com</email>
+<whatsapp_number>0034666555444</whatsapp_number>
+<contact_number>0034666555444</contact_number>
+</property>
+</root>

@@ -1,0 +1,10 @@
+.next
+node_modules
+drizzle
+package-lock.json
+next-env.d.ts
+AGENTS.md
+src/lib/publishing/kyero-spec/*.xsd
+src/lib/publishing/kyero-spec/*.xml
+src/lib/publishing/kyero-spec/*.txt
+drizzle-demo

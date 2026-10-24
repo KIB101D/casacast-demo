@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "photos_one_cover_per_property" ON "photos" USING btree ("property_id") WHERE "photos"."is_cover";
