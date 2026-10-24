@@ -7,15 +7,28 @@ Idealista pull from, and a Telegram channel.
 **The problem it solves:** small agencies retype the same listing on three to five sites. Descriptions
 drift apart, and a flat sold last week is still advertised somewhere.
 
-> Status: back office, photos, the public site in Spanish, English and Ukrainian, the publishing
-> module and enquiries. Next: the nightly demo reset and deployment (see [Roadmap](#roadmap)).
+**Live demo:** https://casacast-demo.vercel.app — the public site in Spanish, English and Ukrainian,
+and the back office at `/login` (press **Try the demo**).
 
-## Try it
+## Try the demo
 
-The public site lives at `/es`, `/en` and `/uk` (the bare domain picks the browser's language):
-a home page with a photo banner and search, the catalogue at `/homes`, listing pages, an About page and a
-Contact page with a message form. Open the back office and press **Try the demo**: no password needed. The demo account can add up to
-10 listings of its own; agency listings are read-only for it, and demo data resets every night.
+Every visitor who presses **Try the demo** gets a sandbox of their own: no password, up to 10
+listings with up to 10 photos each, and everything is deleted every night. What you create is
+visible only to you, on the public site too (tagged **Demo** in the catalogue), and never to other
+visitors, search engines or the public Kyero feed.
+
+| In the hosted demo | What happens                                                                                              |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| Agency website     | Real: publish a listing and open it on the site (only you see it)                                         |
+| Kyero XML feed     | Real validation and XML; your listings are in your own feed, `/feeds/kyero-preview.xml`                   |
+| Telegram           | Simulated through the real queue: the panel goes "Syncing…" → "Published", nothing is sent to Telegram    |
+| Partner portal     | A mock API with latency and random failures, to show retries                                              |
+| Enquiries          | Send the form on any listing or the contact page and it arrives in your sandbox's back office             |
+| Email replies      | Shown in the conversation, marked "not emailed"                                                           |
+| Admin sign-in      | Shown but switched off. [Run it locally](#running-it-locally) to sign in as admin with everything enabled |
+
+Photos you upload stay in the demo's database (re-encoded as JPEG), never in a third-party store,
+and per-connection and daily limits keep the free hosting tiers safe.
 
 ## How publishing works
 
@@ -59,7 +72,7 @@ photos, ticking a channel or pressing **Retry** marks the rows `queued`.
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Agency website | A row in our database; the catalogue reads it                                                                                                      |
 | Kyero XML feed | Checked against Kyero's rules, then listed in `/feeds/kyero.xml` (Kyero v3); portals pull it. Tests validate the feed against Kyero's official XSD |
-| Telegram       | Bot API: photo post with caption and link; edited on update, marked "SOLD" when sold. Demo listings post to a test channel only                    |
+| Telegram       | Bot API: photo post with caption and link; edited on update, marked "SOLD" when sold. Simulated for demo sandboxes                                 |
 | Partner portal | A mock API with latency, random 503s and timeouts, and a 422 for short descriptions, to exercise retries                                           |
 
 The Kyero feed follows Kyero's published V3 schema and notes, kept in
@@ -94,8 +107,9 @@ conversation. It runs on an ordinary mailbox (Gmail with an app password), no do
   cursor moves only after an email is filed, so a database error retries it.
 - **Nothing typed is lost.** A reply is stored first, then sent; a failure keeps the text with the
   server's error and a Retry button.
-- **The public demo never sends email.** Its replies show in the conversation marked "not emailed".
-  Otherwise anyone could type someone's address into the form and send mail from the agency.
+- **The demo never sends email.** Sandboxes' replies show in the conversation marked "not emailed".
+  Otherwise anyone could type someone's address into the form and send mail from the agency. The
+  admin, running locally with a mailbox configured, sends real email.
 
 Tested end to end against local SMTP and IMAP servers: the email that goes out, a reply matched by
 the address, one matched by headers only, unrelated mail ignored, nothing imported twice.
@@ -109,7 +123,7 @@ the address, one matched by headers only, unrelated mail ignored, nothing import
 | Auth       | Signed session cookie (`jose`), bcrypt for the admin          |
 | Validation | Zod, shared by the forms and the Server Actions               |
 | UI         | Tailwind CSS v4, self-hosted Geist                            |
-| Photos     | Cloudinary (local folder fallback in development)             |
+| Photos     | Cloudinary for the admin, Postgres for demo sandboxes         |
 | i18n       | `[locale]` root layout, typed dictionaries, `Intl` formatting |
 | Maps       | Leaflet + OpenStreetMap tiles, no API key                     |
 | Tests / CI | Vitest, GitHub Actions on a real Postgres service             |
@@ -118,8 +132,8 @@ the address, one matched by headers only, unrelated mail ignored, nothing import
 
 - **Drizzle instead of Prisma.** SQL-first, no code generation step and no native engine binary, so
   migrations run the same on a laptop, in CI and on Vercel.
-- **Own session instead of Auth.js.** There is one admin and one demo account, no OAuth. A signed
-  cookie plus a Data Access Layer (`src/lib/auth/dal.ts`) is the pattern the Next.js docs
+- **Own session instead of Auth.js.** There is one admin and anonymous demo sandboxes, no OAuth. A
+  signed cookie plus a Data Access Layer (`src/lib/auth/dal.ts`) is the pattern the Next.js docs
   recommend, and every line of it can be explained.
 - **Authorization lives next to the data.** `src/proxy.ts` only redirects anonymous visitors. Every
   Server Component and Server Action re-checks the user through the DAL, so a hand-crafted request
@@ -165,36 +179,52 @@ the address, one matched by headers only, unrelated mail ignored, nothing import
   so it rebuilds cleanly when you go Back to a page Next.js had kept hidden.
 - **Location without the address.** The map draws a 400 m circle, not a pin, as agencies do before a
   viewing.
-- **The public demo can't read real visitors' details.** Enquiries carry names, emails and phone
-  numbers, and anyone can sign in as the demo. So the demo account sees enquiries about its own
-  listings only (`canSeeLead` in `permissions.ts`, mirrored in the SQL), and they are deleted with
-  the listing.
+- **A sandbox per visitor.** Anyone can open the demo, so nothing one visitor does may reach
+  another, the public site or a real channel. Each "Try the demo" creates a demo user of its own;
+  its listings, photos and enquiries are visible to it only (`src/demo/visibility.ts`, mirrored in
+  the SQL), Telegram is simulated, and a nightly cron deletes every sandbox.
+- **The demo is a layer, not a fork.** Everything demo-specific lives in `src/demo/`, with its own
+  tables and migrations (`drizzle-demo/`, tracked separately), so the product's code and migrations
+  stay as they are.
 - **Enquiries without a CAPTCHA.** A hidden honeypot field catches simple bots; consent to store the
   details is a required checkbox.
 - **Reference numbers can't collide.** New listings get `CB-0011`, `CB-0012`… inside a transaction
   guarded by a Postgres advisory lock, so two saves at the same moment never take the same number.
 
-## Getting started
+## Running it locally
+
+Locally the project runs with everything: sign in as admin, post to a real Telegram channel, store
+photos in Cloudinary and answer enquiries by email. Each integration is optional and switched on by
+its variables in `.env`.
 
 Requirements: Node 22+, Docker (or any Postgres 16).
 
 ```bash
-cp .env.example .env            # set SESSION_SECRET (openssl rand -base64 32); Cloudinary keys optional
+cp .env.example .env            # then fill in the values below
 docker compose up -d            # local Postgres on :5432
 npm install
 npm run db:migrate
-npm run db:seed                 # admin from .env, demo user, 4 channels, 10 listings
+npm run db:seed                 # 4 channels and the agency's 10 listings
 npm run dev
 ```
 
-Telegram is optional: create a bot with [@BotFather](https://t.me/BotFather), make it an admin of
-two channels (the agency's and a test one) and set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` and
-`TELEGRAM_TEST_CHAT_ID`. Without them the channel stays off and says what's missing.
-Email is optional too: set `MAIL_ADDRESS` and `MAIL_APP_PASSWORD` (a Gmail app password, from a
-mailbox made for the agency). Without them the reply box says what's missing.
-`npm test` also runs the queue's integration test when `DATABASE_URL` is set in the environment.
+Open http://localhost:3000 for the site and http://localhost:3000/login for the back office.
 
-Open http://localhost:3000/login.
+| Variables                                                              | What they switch on                                                                                            |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`, `SESSION_SECRET`                                       | Required. The default `DATABASE_URL` matches `docker compose`; the secret is `openssl rand -base64 32`         |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`                                        | Admin sign-in with these credentials: full rights over every listing. No re-seeding needed                     |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`                               | Real posts for the agency's listings (the admin's). Create the bot with @BotFather and make it a channel admin |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | The admin's photos in Cloudinary; without them they go to a local `.uploads/` folder                           |
+| `MAIL_ADDRESS`, `MAIL_APP_PASSWORD`                                    | Email replies from the back office and client replies back in it (a Gmail app password)                        |
+| `CRON_SECRET`                                                          | Protects the scheduled jobs (`/api/cron/demo-reset`, `/api/cron/worker`)                                       |
+
+Sandboxes stay sandboxes whatever is set: their Telegram posts are simulated and their replies are
+never emailed. `npm test` also runs the queue's integration test when `DATABASE_URL` is set in the
+environment.
+
+**Photos for the agency's listings** ship with the repo in `public/seed/<reference>/` (`01.jpg` is
+the cover); the seed adds them to listings that have none.
 
 ## Scripts
 
@@ -207,8 +237,8 @@ Open http://localhost:3000/login.
 | `npm test`                | Unit tests                            |
 | `npm run format`          | Prettier                              |
 | `npm run db:generate`     | New migration from `src/db/schema.ts` |
-| `npm run db:migrate`      | Apply migrations                      |
-| `npm run db:seed`         | Seed data; keeps photos, clears demo  |
+| `npm run db:migrate`      | Apply migrations (product, then demo) |
+| `npm run db:seed`         | Seed the agency's listings and photos |
 | `npm run db:studio`       | Browse the database                   |
 
 ## Project structure
@@ -235,17 +265,22 @@ src/
     publishing/       channel adapters, queue, sync plan, Kyero XML, Telegram
     storage/          Cloudinary and local storage behind one interface
     permissions.ts    roles and limits
-  proxy.ts            language redirect on /, sign-in redirects for /admin
+  demo/               the demo layer: sandboxes, visibility, photo storage in Postgres,
+                      simulated Telegram, Kyero preview feed, rate limits, nightly reset
+  proxy.ts            language redirect on /, sign-in redirect for /admin
 drizzle/              SQL migrations
+drizzle-demo/         the demo layer's own migrations
+public/seed/          photos of the agency's listings
 ```
 
 ## Roadmap
 
 - [x] **Week 1** — tooling, CI, schema and seed, admin and demo sign-in, listings CRUD
-- [x] Photos with Cloudinary: drag-and-drop upload, reordering, cover image, browser-side compression
+- [x] Photos: drag-and-drop upload, reordering, cover image, browser-side compression
 - [x] **Week 2** — public catalogue: filters, map, listing page, ES / EN / UK, SEO, enquiry form
 - [x] **Week 3** — publishing module: channel adapters (site, Kyero XML, Telegram, mock portal),
       statuses and sync log with retry, "sold" unpublishes everywhere
-- [x] Back office: enquiries with new / handled, linked to their listing
-- [x] Email conversations: reply from the agency mailbox, client replies back in the back office
-- [ ] Nightly demo reset (with Cloudinary clean-up), deployment to Vercel, Playwright tests in CI
+- [x] Back office: enquiries (new / in progress / handled), email conversations, EN / UK interface
+- [x] Public demo: a sandbox per visitor, nightly reset, deployment to Vercel + Neon
+- [ ] Playwright end-to-end tests in CI
+- [ ] Map of all listings in the catalogue

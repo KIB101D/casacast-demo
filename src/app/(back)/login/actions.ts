@@ -1,13 +1,11 @@
 "use server";
 
-import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import * as z from "zod";
-import { db } from "@/db";
-import { users } from "@/db/schema";
 import { safeNextPath } from "@/lib/auth/redirect";
 import { createSession, deleteSession } from "@/lib/auth/session";
+import { adminSignInEnabled, signInAdmin } from "@/demo/admin";
+import { hit, visitorKey, WINDOWS } from "@/demo/rate-limit";
 import { openSandbox } from "@/demo/sandbox";
 import type { AdminDictionary } from "@/i18n/admin";
 import { getAdminI18n } from "@/i18n/admin/server";
@@ -25,12 +23,15 @@ export type LoginState = {
   email?: string;
 };
 
-// Compared against when the email is unknown, so the response time doesn't reveal which emails exist.
-let dummyHash: Promise<string> | undefined;
-const getDummyHash = () => (dummyHash ??= bcrypt.hash("not-a-real-password", 12));
-
+/**
+ * Demo version: the admin signs in with ADMIN_EMAIL and ADMIN_PASSWORD from the environment
+ * (src/demo/admin.ts). Without them, as on the public demo, admin sign-in is switched off. Attempts
+ * are rate-limited per connection.
+ */
 export async function login(_prev: LoginState, formData: FormData): Promise<LoginState> {
   const { t } = await getAdminI18n();
+  if (!adminSignInEnabled()) return { error: t.login.adminDisabled };
+
   const parsed = loginSchema(t.login).safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -43,14 +44,13 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   }
 
   const { email, password } = parsed.data;
-  const user = await db.query.users.findFirst({ where: eq(users.email, email) });
-  const passwordOk = await bcrypt.compare(password, user?.passwordHash ?? (await getDummyHash()));
-
-  if (!user || !user.passwordHash || !passwordOk) {
-    return { error: t.login.wrongCredentials, email };
+  if (!(await hit(`login:ip:${await visitorKey()}`, 10, WINDOWS.tenMinutes))) {
+    return { error: t.login.tooManyAttempts, email };
   }
+  const userId = await signInAdmin(email, password);
+  if (!userId) return { error: t.login.wrongCredentials, email };
 
-  await createSession({ userId: user.id, role: user.role });
+  await createSession({ userId, role: "admin" });
   redirect(safeNextPath(formData.get("next")));
 }
 

@@ -60,6 +60,11 @@ export const en = {
     signingIn: "Signing in…",
     invalidEmail: "Enter a valid email.",
     enterPassword: "Enter your password.",
+    adminDisabled: "Admin sign-in is turned off on the public demo.",
+    adminDisabledHint:
+      "Admin sign-in is off on this public demo: try the sandbox above. To sign in as admin, run the project locally with ADMIN_EMAIL and ADMIN_PASSWORD in .env.",
+    howToRun: "How to run it locally",
+    tooManyAttempts: "Too many attempts. Try again in a few minutes.",
     wrongCredentials: "Wrong email or password.",
   },
 

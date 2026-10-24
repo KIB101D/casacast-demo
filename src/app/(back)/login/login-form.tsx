@@ -4,11 +4,16 @@ import { useSearchParams } from "next/navigation";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { errorProps, Field, Input } from "@/components/ui/field";
+import { DEMO_REPO_URL } from "@/demo/config";
 import { useAdminI18n } from "@/i18n/admin/client";
 import { login, loginAsDemo, type LoginState } from "./actions";
 
-/** Demo version: the admin form shows only where an admin exists (ADMIN_EMAIL set, locally). */
-export function LoginForm({ showAdmin }: { showAdmin: boolean }) {
+/**
+ * Demo version: the admin form is always shown, so visitors see the full sign-in. It works where
+ * ADMIN_EMAIL and ADMIN_PASSWORD are set (locally); on the public demo it is switched off and says
+ * how to run the project with an admin.
+ */
+export function LoginForm({ adminEnabled }: { adminEnabled: boolean }) {
   const params = useSearchParams();
   const next = params.get("next") ?? "/admin";
   const [state, formAction, pending] = useActionState<LoginState, FormData>(login, {});
@@ -29,16 +34,29 @@ export function LoginForm({ showAdmin }: { showAdmin: boolean }) {
         ) : null}
       </form>
 
-      {showAdmin ? (
-        <>
-          <div className="text-muted my-6 flex items-center gap-3 text-xs">
-            <span className="bg-line h-px flex-1" />
-            {t.login.orAdmin}
-            <span className="bg-line h-px flex-1" />
-          </div>
+      <>
+        <div className="text-muted my-6 flex items-center gap-3 text-xs">
+          <span className="bg-line h-px flex-1" />
+          {t.login.orAdmin}
+          <span className="bg-line h-px flex-1" />
+        </div>
 
-          <form action={formAction} className="flex flex-col gap-4" noValidate>
-            <input type="hidden" name="next" value={next} />
+        <form action={formAction} className="flex flex-col gap-4" noValidate>
+          <input type="hidden" name="next" value={next} />
+          {!adminEnabled ? (
+            <p className="bg-canvas text-muted rounded-lg px-3 py-2 text-xs leading-relaxed">
+              {t.login.adminDisabledHint}{" "}
+              <a
+                href={`${DEMO_REPO_URL}#running-it-locally`}
+                target="_blank"
+                rel="noopener"
+                className="text-accent underline underline-offset-2"
+              >
+                {t.login.howToRun}
+              </a>
+            </p>
+          ) : null}
+          <fieldset disabled={!adminEnabled} className="flex flex-col gap-4 disabled:opacity-60">
             <Field label={t.login.email} htmlFor="email" errors={state.fieldErrors?.email}>
               <Input
                 id="email"
@@ -65,12 +83,12 @@ export function LoginForm({ showAdmin }: { showAdmin: boolean }) {
                 {state.error}
               </p>
             ) : null}
-            <Button type="submit" variant="secondary" disabled={pending}>
+            <Button type="submit" variant="secondary" disabled={pending || !adminEnabled}>
               {pending ? t.login.signingIn : t.login.signIn}
             </Button>
-          </form>
-        </>
-      ) : null}
+          </fieldset>
+        </form>
+      </>
     </div>
   );
 }

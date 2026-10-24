@@ -17,5 +17,8 @@ export const DEMO_LIMITS = {
   enquiriesPerDay: 500,
 } as const;
 
+/** The public repository; its README explains how to run the full version locally. */
+export const DEMO_REPO_URL = "https://github.com/KIB101D/casacast-demo";
+
 /** Prefix of the emails given to sandbox users; `.invalid` can never be a real address. */
 export const SANDBOX_EMAIL_DOMAIN = "sandbox.casacast.invalid";

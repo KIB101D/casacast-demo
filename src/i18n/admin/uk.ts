@@ -64,6 +64,11 @@ export const uk: AdminDictionary = {
     signingIn: "Входжу…",
     invalidEmail: "Введіть правильний email.",
     enterPassword: "Введіть пароль.",
+    adminDisabled: "Вхід адміна на публічному демо вимкнено.",
+    adminDisabledHint:
+      "На цьому публічному демо вхід адміна вимкнено: спробуйте пісочницю вище. Щоб увійти адміном, запустіть проєкт локально з ADMIN_EMAIL і ADMIN_PASSWORD у .env.",
+    howToRun: "Як запустити локально",
+    tooManyAttempts: "Забагато спроб. Спробуйте за кілька хвилин.",
     wrongCredentials: "Неправильний email або пароль.",
   },
 
